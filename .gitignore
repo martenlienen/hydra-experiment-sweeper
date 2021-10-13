@@ -1,0 +1,5 @@
+# Python artifacts
+/*.egg-info/
+
+# Hydra directories
+/outputs/

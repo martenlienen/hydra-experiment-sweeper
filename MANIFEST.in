@@ -1,0 +1,8 @@
+# Never package compilation artifacts
+global-exclude *.pyc
+global-exclude __pycache__
+
+# Include important text files
+include README.md LICENSE pyproject.toml
+
+recursive-include hydra_plugins/* *.yaml

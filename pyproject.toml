@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hydra-experiment-sweeper"
+version = "0.1.0"
+description = "A hydra sweeper with configurable overrides for reproducible experiments"
+readme = "README.md"
+requires-python = ">= 3.8"
+license = {file = "LICENSE"}
+authors = [{name = "Marten Lienen", email = "marten.lienen@gmail.com"}]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python"
+]
+dependencies = [
+  "hydra-core"
+]
+
+[project.urls]
+homepage = "https://github.com/martenlienen/hydra-experiment-sweeper"
