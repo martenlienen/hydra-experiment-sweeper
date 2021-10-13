@@ -23,3 +23,7 @@ dependencies = [
 
 [project.urls]
 homepage = "https://github.com/martenlienen/hydra-experiment-sweeper"
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
