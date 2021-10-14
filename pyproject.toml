@@ -1,6 +1,10 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = [
+  "flit_core @ git+https://github.com/martenlienen/flit.git@namespace-packages#subdirectory=flit_core",
+  # Setuptools is just for setup.py and editable installs
+  "setuptools"
+]
+build-backend = "flit_core.buildapi"
 
 [project]
 name = "hydra-experiment-sweeper"
@@ -21,8 +25,17 @@ dependencies = [
   "hydra-core"
 ]
 
+[project.optional-dependencies]
+test = ["pytest"]
+
 [project.urls]
 homepage = "https://github.com/martenlienen/hydra-experiment-sweeper"
+
+[tool.flit.module]
+name = "hydra_plugins"
+
+[tool.flit.sdist]
+exclude = ["tests/"]
 
 [tool.black]
 line-length = 88
