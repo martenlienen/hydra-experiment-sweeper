@@ -1,11 +1,17 @@
 import itertools
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, Sequence
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
 
 from hydra.core.config_store import ConfigStore
 from hydra.core.override_parser.overrides_parser import OverridesParser
+from hydra.core.override_parser.types import (
+    ChoiceSweep,
+    Override,
+    OverrideType,
+    ValueType,
+)
 from hydra.core.plugins import Plugins
 from hydra.core.utils import JobReturn
 from hydra.plugins.launcher import Launcher
@@ -22,7 +28,9 @@ class SweeperConfig:
     _target_: str = (
         "hydra_plugins.experiment_sweeper_plugin.experiment_sweeper.ExperimentSweeper"
     )
+
     max_batch_size: Optional[int] = None
+    overrides: Dict[str, Any] = field(default_factory=dict)
 
 
 ConfigStore.instance().store(
@@ -36,17 +44,23 @@ ConfigStore.instance().store(
 class ExperimentSweeper(Sweeper):
     """A hydra sweeper with configurable overrides for reproducible experiments."""
 
-    def __init__(self, max_batch_size: Optional[int]):
+    def __init__(
+        self, max_batch_size: Optional[int], overrides: Dict[str, Union[str, List[Any]]]
+    ):
         super().__init__()
 
         self.max_batch_size = max_batch_size
+        self.overrides = overrides
 
         self.config: Optional[DictConfig] = None
         self.launcher: Optional[Launcher] = None
         self.hydra_context: Optional[HydraContext] = None
 
     def __repr__(self):
-        return f"ExperimentSweeper(max_batch_size={self.max_batch_size!r})"
+        return (
+            f"ExperimentSweeper(max_batch_size={self.max_batch_size!r}, "
+            f"overrides={self.overrides!r})"
+        )
 
     def setup(
         self,
@@ -90,21 +104,48 @@ class ExperimentSweeper(Sweeper):
 
     def generate_jobs(self, arguments):
         parser = OverridesParser.create()
-        parsed = parser.parse_overrides(arguments)
+        configured_overrides = self.parse_configured_overrides(parser)
+        cmd_overrides = parser.parse_overrides(arguments)
 
-        lists = []
-        for override in parsed:
-            if override.is_sweep_override():
-                sweep_choices = override.sweep_string_iterator()
-                key = override.get_key_element()
-                sweep = [f"{key}={val}" for val in sweep_choices]
-                lists.append(sweep)
+        override_choices = []
+        overriden = set()
+        for override in reversed(configured_overrides + cmd_overrides):
+            key = override.get_key_element()
+            if key in overriden:
+                # The key is already overriden by a higher-priority override, e.g. command
+                # line setting overriding the config file.
+                continue
             else:
-                key = override.get_key_element()
-                value = override.get_value_element_as_str()
-                lists.append([f"{key}={value}"])
-        jobs = list(itertools.product(*lists))
+                overriden.add(key)
+
+            if override.is_sweep_override():
+                values = override.sweep_string_iterator()
+            else:
+                values = [override.get_value_element_as_str()]
+
+            override_choices.append([f"{key}={value}" for value in values])
+
+        # Put the overrides in the same order as they were read from the configuration and
+        # command line arguments. This is expected by the BasicSweeper tests that we
+        # re-use.
+        override_choices.reverse()
+
+        jobs = list(itertools.product(*override_choices))
         return jobs
+
+    def parse_configured_overrides(self, parser: OverridesParser):
+        def parse(key, value):
+            if isinstance(value, str):
+                return parser.parse_override(f"{key}={value}")
+            else:
+                return Override(
+                    type=OverrideType.CHANGE,
+                    key_or_group=key,
+                    value_type=ValueType.CHOICE_SWEEP,
+                    _value=ChoiceSweep(list=value),
+                )
+
+        return [parse(key, value) for key, value in self.overrides.items()]
 
     def batch_size(self, jobs: Iterable) -> int:
         if self.max_batch_size is None or self.max_batch_size == -1:

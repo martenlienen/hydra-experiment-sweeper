@@ -1,0 +1,13 @@
+defaults:
+  - override hydra/sweeper: experiment
+
+hydra:
+  sweeper:
+    overrides:
+      foo: a,3,True
+      bar:
+        - 1
+        - yes
+
+foo: ~
+bar: ~

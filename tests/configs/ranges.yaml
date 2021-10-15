@@ -1,0 +1,9 @@
+defaults:
+  - override hydra/sweeper: experiment
+
+hydra:
+  sweeper:
+    overrides:
+      foo: range(1.5, 3.0, 0.5)
+
+foo: ~
