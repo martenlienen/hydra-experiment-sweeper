@@ -1,4 +1,5 @@
 # Python artifacts
+__pycache__
 /dist/
 
 # Hydra directories

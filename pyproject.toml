@@ -22,7 +22,8 @@ classifiers = [
   "Programming Language :: Python"
 ]
 dependencies = [
-  "hydra-core"
+  "hydra-core",
+  "more-itertools"
 ]
 
 [project.optional-dependencies]
@@ -40,3 +41,6 @@ exclude = ["tests/"]
 [tool.black]
 line-length = 88
 target-version = ["py38"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
