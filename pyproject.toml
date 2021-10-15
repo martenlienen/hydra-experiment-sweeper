@@ -36,7 +36,7 @@ homepage = "https://github.com/martenlienen/hydra-experiment-sweeper"
 name = "hydra_plugins"
 
 [tool.flit.sdist]
-exclude = ["tests/"]
+exclude = ["tests/", "example/"]
 
 [tool.black]
 line-length = 88

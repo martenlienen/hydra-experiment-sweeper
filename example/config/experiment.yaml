@@ -1,0 +1,14 @@
+defaults:
+  - train
+  - override hydra/sweeper: experiment
+  - _self_
+
+hydra:
+  sweeper:
+    max_batch_size: 2
+    overrides:
+      model: linreg,svm
+      learning_rate: range(0.1, 0.3, 0.1)
+      seed:
+        - 123
+        - 42
