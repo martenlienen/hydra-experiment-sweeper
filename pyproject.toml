@@ -1,14 +1,10 @@
 [build-system]
-requires = [
-  "flit_core @ git+https://github.com/martenlienen/flit.git@namespace-packages#subdirectory=flit_core",
-  # Setuptools is just for setup.py and editable installs
-  "setuptools"
-]
+requires = ["flit_core >=3.5,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
 name = "hydra-experiment-sweeper"
-version = "0.1.0"
+version = "0.1.1"
 description = "A hydra sweeper with configurable overrides for reproducible experiments"
 readme = "README.md"
 requires-python = ">= 3.8"
@@ -33,7 +29,7 @@ test = ["pytest"]
 homepage = "https://github.com/martenlienen/hydra-experiment-sweeper"
 
 [tool.flit.module]
-name = "hydra_plugins"
+name = "hydra_plugins.experiment_sweeper_plugin"
 
 [tool.flit.sdist]
 exclude = ["tests/", "example/"]
